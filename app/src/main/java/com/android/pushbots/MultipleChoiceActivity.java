@@ -12,6 +12,10 @@ import android.view.View;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.ImageView;
 
+import com.pushbots.push.Pushbots;
+
+import org.json.JSONArray;
+
 public class MultipleChoiceActivity extends AppCompatActivity {
 
     // Hold a reference to the current animator,
@@ -27,6 +31,14 @@ public class MultipleChoiceActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_multiple_choice);
+
+        // register activity to receive notifications
+        Pushbots.sharedInstance().registerForRemoteNotifications();
+
+        // register for lecture 1
+        JSONArray tags = new JSONArray();
+        tags.put("0");
+        Pushbots.sharedInstance().tag(tags);
 
         final View thumb1View = findViewById(R.id.multiple_choice_image_button);
         thumb1View.setOnClickListener(new View.OnClickListener() {

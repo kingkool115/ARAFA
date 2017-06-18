@@ -11,6 +11,6 @@ public class MyApplication extends Application {
         super.onCreate();
          // Initialize Pushbots Library
         Pushbots.sharedInstance().init(this);
-
+        //Pushbots.sharedInstance().setCustomHandler(customHandler.class);
     }
 }
