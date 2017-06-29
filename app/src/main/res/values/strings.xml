@@ -5,6 +5,7 @@
 
     <string name="my_lectures">My Lectures</string>
     <string name="find_lectures">Find Lectures</string>
+    <string name="current_survey">Current Survey</string>
 
     <string name="sign_in">Sign In</string>
     <string name="register">Register</string>

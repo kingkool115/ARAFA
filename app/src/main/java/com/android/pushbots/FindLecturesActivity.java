@@ -1,5 +1,6 @@
 package com.android.pushbots;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -8,14 +9,18 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.EditText;
 import android.widget.LinearLayout;
-import android.widget.RadioButton;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import com.android.volley.Request;
@@ -29,7 +34,11 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
+
 import db.DBHelper;
+import util.CustomListAdapter;
+import util.Lecture;
 
 
 /**
@@ -64,42 +73,73 @@ public class FindLecturesActivity extends AppCompatActivity
         navigationView.setNavigationItemSelectedListener(this);
 
 
-        initSubscribeButton();
+        initFilterFunction();
         loadLectures();
+    }
+
+
+    /**
+     * This function implements the filter function, when user want to filter lectures.
+     * */
+    private void initFilterFunction() {
+        ListView findLecturesListView = (ListView) findViewById(R.id.listview_find_lectures);
+
+        ArrayList<Lecture> checkboxList = new ArrayList<>();
+
+        checkboxList.add(new Lecture("Pickachu", "1"));
+        checkboxList.add(new Lecture("Pickachuuuuuuu", "5"));
+        checkboxList.add(new Lecture("Shiggi", "2"));
+        checkboxList.add(new Lecture("Bisasam", "3"));
+
+        // get data from the table by the ListAdapter
+        final CustomListAdapter customAdapter = new CustomListAdapter(this, R.layout.listitemrow, checkboxList);
+
+        findLecturesListView.setAdapter(customAdapter);
+
+        EditText filterText = (EditText) findViewById(R.id.filterLectures);
+        filterText.addTextChangedListener(new TextWatcher() {
+
+            @Override
+            public void onTextChanged(CharSequence cs, int arg1, int arg2, int arg3) {
+                // When user changed the Text
+                customAdapter.getFilter().filter(cs);
+            }
+
+            @Override
+            public void beforeTextChanged(CharSequence arg0, int arg1, int arg2, int arg3) { }
+
+            @Override
+            public void afterTextChanged(Editable arg0) {}
+        });
     }
 
     /**
      * Init subscribe button and add onClickListener to it. When this button is clicked,
      * the selected lectures will be saved to DB.
      * */
-    private void initSubscribeButton() {
-        Button subscribeButton = (Button) findViewById(R.id.subscribe_button);
+    private void clickSubscribe(View view) {
         final DBHelper dbHelper = new DBHelper(this);
 
-        subscribeButton.setOnClickListener(new Button.OnClickListener() {
-            public void onClick(View v) {
+        //Do stuff here
+        ListView listViewLayout = (ListView) findViewById(R.id.listview_find_lectures);
 
-                //Do stuff here
-                LinearLayout linearLayout = (LinearLayout) findViewById(R.id.linearLayout_lectures);
+        // iterate all lecture checkboxes
+        for (int i = 0; i < listViewLayout.getChildCount(); i++) {
+            LinearLayout lectureEntry = (LinearLayout) listViewLayout.getChildAt(i);
+            CheckBox lectureCheckbox = (CheckBox) lectureEntry.getChildAt(0);
 
-                // iterate all lecture radioButtons
-                for (int i = 0; i < linearLayout.getChildCount(); i++) {
-                    RadioButton lectureRadio = (RadioButton) linearLayout.getChildAt(i);
-
-                    // if lecture is selected then insert into DB.
-                    if (lectureRadio.isChecked()) {
-                        String lectureId = lectureRadio.getTag().toString();
-                        String lectuteName = lectureRadio.getText().toString();
-                        if (!dbHelper.lectureExists(lectureId)) {
-                            dbHelper.insertLecture(lectureId, lectuteName);
-                        }
-                    }
+            // if lecture is selected then insert into DB.
+            if (lectureCheckbox.isChecked()) {
+                String lectureId = lectureCheckbox.getTag().toString();
+                String lectureName = lectureCheckbox.getText().toString();
+                if (!dbHelper.lectureExists(lectureId)) {
+                    dbHelper.insertLecture(lectureId, lectureName);
                 }
-
-                // reload lectures in view
-                loadLectures();
             }
-        });
+        }
+
+        // reload lectures in view
+        loadLectures();
     }
 
     /**
@@ -139,17 +179,17 @@ public class FindLecturesActivity extends AppCompatActivity
 
     /**
      * HTTP Response is parsed to an JSONArray of lectures. Every lecture will be added as an
-     * RadioButton to the list view.
+     * CheckBox to the list view.
      *
      * @param response HTTP response content from server.
      * */
     private void fillLecturesList(String response) throws JSONException {
         JSONArray lecturesArray = new JSONArray(response);
-        LinearLayout linearLayoutLectures = (LinearLayout) findViewById(R.id.linearLayout_lectures);
+        ListView listViewLectures = (ListView) findViewById(R.id.listview_find_lectures);
 
         // needed for refill lecture list after clicking subscribe button
-        if (linearLayoutLectures.getChildCount() > 0) {
-            linearLayoutLectures.removeAllViews();
+        if (listViewLectures.getChildCount() > 0) {
+            listViewLectures.removeAllViews();
         }
 
         // iterate all lectures
@@ -161,7 +201,7 @@ public class FindLecturesActivity extends AppCompatActivity
             if (!dbHelper.lectureExists(lecture.get("id").toString())) {
 
                 // create a new RadioButton
-                RadioButton lectureEntry = new RadioButton(this);
+                CheckBox lectureEntry = new CheckBox(this);
                 lectureEntry.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
                         ViewGroup.LayoutParams.WRAP_CONTENT));
                 lectureEntry.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 20);
@@ -169,7 +209,7 @@ public class FindLecturesActivity extends AppCompatActivity
 
                 lectureEntry.setText(lecture.get("name").toString());
                 lectureEntry.setTag(lecture.get("id").toString());
-                linearLayoutLectures.addView(lectureEntry);
+                listViewLectures.addView(lectureEntry);
             }
         }
     }
@@ -178,7 +218,7 @@ public class FindLecturesActivity extends AppCompatActivity
      * Creates a dialog with a progressbar while loading all lectures from web server.
      * */
     private void showLoadingDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.MyAlertDialogStyle);
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
         // Get the layout inflater
         LayoutInflater inflater = this.getLayoutInflater();
 
@@ -220,12 +260,13 @@ public class FindLecturesActivity extends AppCompatActivity
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        if (id == R.id.nav_camera) {
-            // Handle the camera action
-        } else if (id == R.id.nav_gallery) {
-
-        } else if (id == R.id.nav_manage) {
-
+        if (id == R.id.my_lectures) {
+            Intent intent = new Intent(FindLecturesActivity.this, MyLecturesActivity.class);
+            this.startActivity(intent);
+        } else if (id == R.id.settings) {
+            // TODO: open settings activity
+        } else if (id == R.id.current_survey) {
+            // TODO: open current survey activity
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
