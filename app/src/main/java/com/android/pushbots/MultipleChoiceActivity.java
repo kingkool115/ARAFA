@@ -16,6 +16,11 @@ import com.pushbots.push.Pushbots;
 
 import org.json.JSONArray;
 
+
+/**
+ * This Activity displays a multiple choice or a text response question.
+ * User can answer it by clicking on submit button.
+ * */
 public class MultipleChoiceActivity extends AppCompatActivity {
 
     // Hold a reference to the current animator,
@@ -31,6 +36,7 @@ public class MultipleChoiceActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_multiple_choice);
+        getSupportActionBar().setTitle(R.string.question);
 
         // register activity to receive notifications
         Pushbots.sharedInstance().registerForRemoteNotifications();
@@ -53,6 +59,12 @@ public class MultipleChoiceActivity extends AppCompatActivity {
                 android.R.integer.config_shortAnimTime);
     }
 
+    /**
+     * Make Picture from question full sized.
+     *
+     * @param thumbView where full size picture will be displayed.
+     * @param imageResId resource id of image which will be displayed in that thumbview.
+     * */
     private void zoomImageFromThumb(final View thumbView, int imageResId) {
         // If there's an animation in progress, cancel it
         // immediately and proceed with this one.

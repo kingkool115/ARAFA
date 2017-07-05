@@ -1,0 +1,216 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#ddd"
+    android:orientation="vertical"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior"
+    tools:context="com.android.pushbots.CurrentSurveyActivity"
+    tools:showIn="@layout/app_bar_current_survey"
+    android:weightSum="8">
+
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="1">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+                <Button
+                    android:background="@drawable/question_button"
+                    android:textColor="#FFFFFF"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:text="Subscribe fgdgfdgsdfgsfdgsfd fsdfsdfsdfsdfsdfsd fsfsdfsdfsdfsdffs  asadfsafsadfsa safasf asdfa gr"
+                    android:textSize="15dp" />
+                <Button
+                    android:background="@drawable/question_button"
+                    android:textColor="#FFFFFF"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:text="Subscribe fgdgfdgsdfgsfdgsfd fsdfsdfsdfsdfsdfsd fsfsdfsdfsdfsdffs  asadfsafsadfsa safasf asdfa gr"
+                    android:textSize="15dp" />
+                <Button
+                    android:background="@drawable/question_button"
+                    android:textColor="#FFFFFF"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:text="Subscribe fgdgfdgsdfgsfdgsfd fsdfsdfsdfsdfsdfsd fsfsdfsdfsdfsdffs  asadfsafsadfsa safasf asdfa gr"
+                    android:textSize="15dp" />
+                <Button
+                    android:background="@drawable/question_button"
+                    android:textColor="#FFFFFF"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:text="Subscribe fgdgfdgsdfgsfdgsfd fsdfsdfsdfsdfsdfsd fsfsdfsdfsdfsdffs  asadfsafsadfsa safasf asdfa gr"
+                    android:textSize="15dp" />
+                <Button
+                    android:background="@drawable/question_button"
+                    android:textColor="#FFFFFF"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:text="Subscribe fgdgfdgsdfgsfdgsfd fsdfsdfsdfsdfsdfsd fsfsdfsdfsdfsdffs  asadfsafsadfsa safasf asdfa gr"
+                    android:textSize="15dp" />
+                <Button
+                    android:background="@drawable/question_button"
+                    android:textColor="#FFFFFF"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:text="Subscribe fgdgfdgsdfgsfdgsfd fsdfsdfsdfsdfsdfsd fsfsdfsdfsdfsdffs  asadfsafsadfsa safasf asdfa gr"
+                    android:textSize="15dp" />
+                <Button
+                    android:background="@drawable/question_button"
+                    android:textColor="#FFFFFF"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:text="Subscribe fgdgfdgsdfgsfdgsfd fsdfsdfsdfsdfsdfsd fsfsdfsdfsdfsdffs  asadfsafsadfsa safasf asdfa gr"
+                    android:textSize="15dp" />
+                <Button
+                    android:background="@drawable/question_button"
+                    android:textColor="#FFFFFF"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:text="Subscribe fgdgfdgsdfgsfdgsfd fsdfsdfsdfsdfsdfsd fsfsdfsdfsdfsdffs  asadfsafsadfsa safasf asdfa gr"
+                    android:textSize="15dp" />
+                <Button
+                    android:background="@drawable/question_button"
+                    android:textColor="#FFFFFF"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:text="Subscribe fgdgfdgsdfgsfdgsfd fsdfsdfsdfsdfsdfsd fsfsdfsdfsdfsdffs  asadfsafsadfsa safasf asdfa gr"
+                    android:textSize="15dp" />
+                <Button
+                    android:background="@drawable/question_button"
+                    android:textColor="#FFFFFF"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:text="Subscribe fgdgfdgsdfgsfdgsfd fsdfsdfsdfsdfsdfsd fsfsdfsdfsdfsdffs  asadfsafsadfsa safasf asdfa gr"
+                    android:textSize="15dp" />
+                <Button
+                    android:background="@drawable/question_button"
+                    android:textColor="#FFFFFF"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:text="Subscribe fgdgfdgsdfgsfdgsfd fsdfsdfsdfsdfsdfsd fsfsdfsdfsdfsdffs  asadfsafsadfsa safasf asdfa gr"
+                    android:textSize="15dp" />
+                <Button
+                    android:background="@drawable/question_button"
+                    android:textColor="#FFFFFF"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:text="Subscribe fgdgfdgsdfgsfdgsfd fsdfsdfsdfsdfsdfsd fsfsdfsdfsdfsdffs  asadfsafsadfsa safasf asdfa gr"
+                    android:textSize="15dp" />
+                <Button
+                    android:background="@drawable/question_button"
+                    android:textColor="#FFFFFF"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:text="Subscribe fgdgfdgsdfgsfdgsfd fsdfsdfsdfsdfsdfsd fsfsdfsdfsdfsdffs  asadfsafsadfsa safasf asdfa gr"
+                    android:textSize="15dp" />
+                <Button
+                    android:background="@drawable/question_button"
+                    android:textColor="#FFFFFF"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:text="Subscribe fgdgfdgsdfgsfdgsfd fsdfsdfsdfsdfsdfsd fsfsdfsdfsdfsdffs  asadfsafsadfsa safasf asdfa gr"
+                    android:textSize="15dp" />
+                <Button
+                    android:background="@drawable/question_button"
+                    android:textColor="#FFFFFF"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:text="Subscribe fgdgfdgsdfgsfdgsfd fsdfsdfsdfsdfsdfsd fsfsdfsdfsdfsdffs  asadfsafsadfsa safasf asdfa gr"
+                    android:textSize="15dp" />
+                <Button
+                    android:background="@drawable/question_button"
+                    android:textColor="#FFFFFF"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:text="Subscribe fgdgfdgsdfgsfdgsfd fsdfsdfsdfsdfsdfsd fsfsdfsdfsdfsdffs  asadfsafsadfsa safasf asdfa gr"
+                    android:textSize="15dp" />
+                <Button
+                    android:background="@drawable/question_button"
+                    android:textColor="#FFFFFF"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:text="Subscribe fgdgfdgsdfgsfdgsfd fsdfsdfsdfsdfsdfsd fsfsdfsdfsdfsdffs  asadfsafsadfsa safasf asdfa gr"
+                    android:textSize="15dp" />
+                <Button
+                    android:background="@drawable/question_button"
+                    android:textColor="#FFFFFF"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:text="Subscribe fgdgfdgsdfgsfdgsfd fsdfsdfsdfsdfsdfsd fsfsdfsdfsdfsdffs  asadfsafsadfsa safasf asdfa gr"
+                    android:textSize="15dp" />
+                <Button
+                    android:background="@drawable/question_button"
+                    android:textColor="#FFFFFF"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:text="Subscribe fgdgfdgsdfgsfdgsfd fsdfsdfsdfsdfsdfsd fsfsdfsdfsdfsdffs  asadfsafsadfsa safasf asdfa gr"
+                    android:textSize="15dp" />
+                <Button
+                    android:background="@drawable/question_button"
+                    android:textColor="#FFFFFF"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:text="Subscribe fgdgfdgsdfgsfdgsfd fsdfsdfsdfsdfsdfsd fsfsdfsdfsdfsdffs  asadfsafsadfsa safasf asdfa gr"
+                    android:textSize="15dp" />
+
+            </LinearLayout>
+    </ScrollView>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="7"
+        android:weightSum="5">
+
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="2"/>
+
+        <Button
+            android:id="@+id/mute_survey_button"
+            android:background="@drawable/red_button"
+            android:textColor="#FFFFFF"
+            android:layout_weight="1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:onClick="muteSurvey"
+            android:text="Mute Survey"
+            android:textSize="20dp"
+            android:textStyle="bold" />
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="2"/>
+    </LinearLayout>
+</LinearLayout>

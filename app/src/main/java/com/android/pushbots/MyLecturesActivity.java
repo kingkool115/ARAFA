@@ -1,17 +1,8 @@
 package com.android.pushbots;
 
 import android.content.DialogInterface;
-import android.content.Intent;
-import android.support.annotation.NonNull;
-import android.support.design.widget.NavigationView;
-import android.support.v4.view.GravityCompat;
-import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.Toolbar;
-import android.view.MenuItem;
+import android.support.v7.app.AlertDialog;
 import android.view.View;
 import android.widget.CheckBox;
 import android.widget.LinearLayout;
@@ -29,8 +20,7 @@ import util.Lecture;
  * unsubscribe from lectures, than he has to select those and click unsubscribe-button.
  *
  * */
-public class MyLecturesActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener {
+public class MyLecturesActivity extends NavigationBarActivity {
 
     ListView myLecturesListView;
 
@@ -38,23 +28,9 @@ public class MyLecturesActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_my_lectures);
-
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar );
-        setSupportActionBar(toolbar);
-        getSupportActionBar().setTitle(R.string.my_lectures);
-
-
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        drawer.setDrawerListener(toggle);
-        toggle.syncState();
-
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
-        navigationView.setNavigationItemSelectedListener(this);
+        super.setNavigationbarAndToolbarTitle(R.string.my_lectures);
 
         myLecturesListView = (ListView) findViewById(R.id.listview_my_lectures);
-
 
         //TODO: load my lectures -> load lectures from DB.
         ArrayList<Lecture> checkboxList = new ArrayList<>();
@@ -123,34 +99,5 @@ public class MyLecturesActivity extends AppCompatActivity
 
         // show it
         alertDialog.show();
-    }
-
-    @Override
-    public void onBackPressed() {
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        if (drawer.isDrawerOpen(GravityCompat.START)) {
-            drawer.closeDrawer(GravityCompat.START);
-        } else {
-            super.onBackPressed();
-        }
-    }
-
-    @Override
-    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-        // Handle navigation view item clicks here.
-        int id = item.getItemId();
-
-        if (id == R.id.find_lectures) {
-            Intent intent = new Intent(MyLecturesActivity.this, FindLecturesActivity.class);
-            this.startActivity(intent);
-        } else if (id == R.id.settings) {
-            // TODO: open settings activity
-        } else if (id == R.id.current_survey) {
-            // TODO: open current survey activity
-        }
-
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        drawer.closeDrawer(GravityCompat.START);
-        return true;
     }
 }

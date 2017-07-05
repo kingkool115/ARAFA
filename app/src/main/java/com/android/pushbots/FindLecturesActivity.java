@@ -1,22 +1,13 @@
 package com.android.pushbots;
 
-import android.content.Intent;
 import android.os.Bundle;
-import android.support.design.widget.NavigationView;
-import android.support.v4.view.GravityCompat;
-import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.LinearLayout;
@@ -47,8 +38,7 @@ import util.Lecture;
  * will be visible in MyLecturesActivity. Whenever a lecture is subscribed, it will be saved into DB.
  * After Subscribe-Button is clicked, the activity will refresh the lectures in that view.
  * */
-public class FindLecturesActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener {
+public class FindLecturesActivity extends NavigationBarActivity {
 
     // TODO: change this url
     String URL_LECTURES = "http://192.168.178.26:8000/api/lectures";
@@ -58,20 +48,7 @@ public class FindLecturesActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_find_lectures);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar );
-        setSupportActionBar(toolbar);
-        getSupportActionBar().setTitle(R.string.find_lectures);
-
-
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        drawer.setDrawerListener(toggle);
-        toggle.syncState();
-
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
-        navigationView.setNavigationItemSelectedListener(this);
-
+        super.setNavigationbarAndToolbarTitle(R.string.find_lectures);
 
         initFilterFunction();
         loadLectures();
@@ -116,7 +93,7 @@ public class FindLecturesActivity extends AppCompatActivity
     /**
      * Init subscribe button and add onClickListener to it. When this button is clicked,
      * the selected lectures will be saved to DB.
-     * */
+     **/
     private void clickSubscribe(View view) {
         final DBHelper dbHelper = new DBHelper(this);
 
@@ -242,35 +219,5 @@ public class FindLecturesActivity extends AppCompatActivity
         builder.setMessage(errorMessage);
         builder.create();
         builder.show();
-    }
-
-    @Override
-    public void onBackPressed() {
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        if (drawer.isDrawerOpen(GravityCompat.START)) {
-            drawer.closeDrawer(GravityCompat.START);
-        } else {
-            super.onBackPressed();
-        }
-    }
-
-    @SuppressWarnings("StatementWithEmptyBody")
-    @Override
-    public boolean onNavigationItemSelected(MenuItem item) {
-        // Handle navigation view item clicks here.
-        int id = item.getItemId();
-
-        if (id == R.id.my_lectures) {
-            Intent intent = new Intent(FindLecturesActivity.this, MyLecturesActivity.class);
-            this.startActivity(intent);
-        } else if (id == R.id.settings) {
-            // TODO: open settings activity
-        } else if (id == R.id.current_survey) {
-            // TODO: open current survey activity
-        }
-
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        drawer.closeDrawer(GravityCompat.START);
-        return true;
     }
 }
