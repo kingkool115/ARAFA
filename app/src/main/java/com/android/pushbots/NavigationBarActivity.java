@@ -78,7 +78,6 @@ public class NavigationBarActivity extends AppCompatActivity
             // TODO: open current survey activity
             intent = new Intent(getApplicationContext(), CurrentSurveyActivity.class);
         }
-
         if (intent != null) {
             this.startActivity(intent);
         }

@@ -110,7 +110,7 @@ public class FindLecturesActivity extends NavigationBarActivity {
                 String lectureId = lectureCheckbox.getTag().toString();
                 String lectureName = lectureCheckbox.getText().toString();
                 if (!dbHelper.lectureExists(lectureId)) {
-                    dbHelper.insertLecture(lectureId, lectureName);
+                    dbHelper.subscribeForLecture(lectureId, lectureName);
                 }
             }
         }
@@ -146,7 +146,6 @@ public class FindLecturesActivity extends NavigationBarActivity {
 
                 @Override
                 public void onErrorResponse(VolleyError error) {
-                    // TODO Auto-generated method stub
                     progressDialog.dismiss();
                     showErrorDialog(error.getMessage());
             }
