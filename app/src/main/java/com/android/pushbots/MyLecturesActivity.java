@@ -1,6 +1,7 @@
 package com.android.pushbots;
 
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.view.View;
@@ -99,7 +100,7 @@ public class MyLecturesActivity extends NavigationBarActivity {
                         dbHelper.unsubscribeFromLecture(lectureIdsToUnsubscribe);
                         // Untag in Pushbots instance to avoid pushed questions related to this lecture.
                         for (String lectureId : lectureIdsToUnsubscribe) {
-                            Pushbots.sharedInstance().untag("lectureId");
+                            Pushbots.sharedInstance().untag(lectureId);
                         }
                         // empty and refill list with subscribed lectures entries.
                         checkboxList = new ArrayList<>();

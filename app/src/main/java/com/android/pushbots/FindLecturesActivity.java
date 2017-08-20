@@ -21,6 +21,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import db.DBHelper;
 import util.CustomListAdapter;
@@ -102,11 +103,25 @@ public class FindLecturesActivity extends NavigationBarActivity {
                 String lectureName = lectureCheckbox.getText().toString();
                 if (!dbHelper.lectureExists(lectureId)) {
                     dbHelper.subscribeForLecture(lectureId, lectureName);
-                    // tag in pushbots instance to receive questions related to this lecture.
-                    Pushbots.sharedInstance().tag(lectureId);
                 }
             }
         }
+
+
+        // Tag lectures in PushBots
+        List<Lecture> subscribedLectures =  dbHelper.getSubscribedLectures();
+        JSONArray tags = new JSONArray();
+        for (Lecture lecture : subscribedLectures) {
+            tags.put("" + lecture.getId());
+        }
+        JSONObject jsonObject = new JSONObject();
+        try{
+            jsonObject.put("tags", tags);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        // resets all old tags and add new tags
+        Pushbots.sharedInstance().update(jsonObject);
 
         // reload lectures in view
         RestTask restTask = new RestTask(this, ACTION_FOR_INTENT_CALLBACK);
