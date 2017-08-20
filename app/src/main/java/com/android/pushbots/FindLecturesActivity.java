@@ -139,10 +139,9 @@ public class FindLecturesActivity extends NavigationBarActivity {
         ListView listViewLectures = (ListView) findViewById(R.id.listview_find_lectures);
 
         // needed for refill lecture list after clicking subscribe button
-        if (listViewLectures.getChildCount() > 0) {
-            checkboxList = new ArrayList<>();
-            listViewLectures.setAdapter(new CustomListAdapter(this, R.layout.listitemrow, checkboxList));
-        }
+        checkboxList = new ArrayList<>();
+        listViewLectures.setAdapter(new CustomListAdapter(this, R.layout.listitemrow, checkboxList));
+
 
         // iterate all lectures
         for (int x = 0; x < lecturesArray.length(); x++) {

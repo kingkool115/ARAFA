@@ -1,5 +1,7 @@
 package com.android.pushbots;
 
+import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -69,13 +71,10 @@ public class NavigationBarActivity extends AppCompatActivity
             this.getApplicationContext();
             intent = new Intent(getApplicationContext(), FindLecturesActivity.class);
         } else if (id == R.id.my_lectures) {
-            // TODO: open settings activity
             intent = new Intent(getApplicationContext(), MyLecturesActivity.class);
         } else if (id == R.id.multiple_choice) {
-            // TODO: open settings activity
             intent = new Intent(getApplicationContext(), AnswerQuestionActivity.class);
         } else if (id == R.id.current_survey) {
-            // TODO: open current survey activity
             intent = new Intent(getApplicationContext(), OpenQuestionsActivity.class);
         }
         if (intent != null) {
