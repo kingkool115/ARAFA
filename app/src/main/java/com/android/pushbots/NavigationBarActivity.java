@@ -73,10 +73,10 @@ public class NavigationBarActivity extends AppCompatActivity
             intent = new Intent(getApplicationContext(), MyLecturesActivity.class);
         } else if (id == R.id.multiple_choice) {
             // TODO: open settings activity
-            intent = new Intent(getApplicationContext(), MultipleChoiceActivity.class);
+            intent = new Intent(getApplicationContext(), AnswerQuestionActivity.class);
         } else if (id == R.id.current_survey) {
             // TODO: open current survey activity
-            intent = new Intent(getApplicationContext(), CurrentSurveyActivity.class);
+            intent = new Intent(getApplicationContext(), OpenQuestionsActivity.class);
         }
         if (intent != null) {
             this.startActivity(intent);

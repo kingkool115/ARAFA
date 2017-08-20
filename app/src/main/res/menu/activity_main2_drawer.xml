@@ -13,7 +13,7 @@
         <item
             android:id="@+id/current_survey"
             android:icon="@drawable/ic_menu_gallery"
-            android:title="@string/current_survey" />
+            android:title="@string/open_questions" />
         <item
             android:id="@+id/multiple_choice"
             android:icon="@drawable/ic_menu_manage"

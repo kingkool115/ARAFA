@@ -88,7 +88,7 @@ public class CustomListAdapter extends ArrayAdapter<Lecture> implements Filterab
                 constraint = constraint.toString().toLowerCase();
                 for (int i = 0; i < items.size(); i++) {
                     String lectureName = items.get(i).getName();
-                    String lectureId = items.get(i).getId();
+                    int lectureId = items.get(i).getId();
                     if (lectureName.toLowerCase().startsWith(constraint.toString()))  {
                         FilteredArrayNames.add(new Lecture(lectureName, lectureId));
                     }

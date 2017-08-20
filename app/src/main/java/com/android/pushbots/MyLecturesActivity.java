@@ -9,8 +9,13 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.Toast;
 
-import java.util.ArrayList;
+import com.pushbots.push.Pushbots;
 
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+
+import db.DBHelper;
 import util.CustomListAdapter;
 import util.Lecture;
 
@@ -23,28 +28,34 @@ import util.Lecture;
 public class MyLecturesActivity extends NavigationBarActivity {
 
     ListView myLecturesListView;
+    ArrayList<Lecture> checkboxList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Pushbots.sharedInstance().registerForRemoteNotifications();
         setContentView(R.layout.activity_my_lectures);
         super.setNavigationbarAndToolbarTitle(R.string.my_lectures);
-
         myLecturesListView = (ListView) findViewById(R.id.listview_my_lectures);
 
-        //TODO: load my lectures -> load lectures from DB.
-        ArrayList<Lecture> checkboxList = new ArrayList<>();
-
-        checkboxList.add(new Lecture("Pickachu", "1"));
-        checkboxList.add(new Lecture("Pickachuuuuuuu", "5"));
-        checkboxList.add(new Lecture("Shiggi", "2"));
-        checkboxList.add(new Lecture("Bisasam", "3"));
+        checkboxList = new ArrayList<>();
 
         // get data from the table by the ListAdapter
         final CustomListAdapter customAdapter = new CustomListAdapter(this, R.layout.listitemrow, checkboxList);
 
         myLecturesListView.setAdapter(customAdapter);
+        fillLecturesList();
+    }
 
+    /**
+     * Fill lectures list with subscribed lectures from DB.
+     * */
+    public void fillLecturesList() {
+        DBHelper dbHelper = new DBHelper(this);
+        List<Lecture> subscribedLectures = dbHelper.getSubscribedLectures();
+        for (Lecture lecture : subscribedLectures) {
+            checkboxList.add(lecture);
+        }
     }
 
     /**
@@ -58,12 +69,14 @@ public class MyLecturesActivity extends NavigationBarActivity {
 
         // set selectedLectures with marked lectures
         String selectedLectures = "";
+        List<String> selectedLectureIds = new LinkedList<>();
         for (int x = 0; x < myLecturesListView.getChildCount(); x++) {
             LinearLayout lectureEntry = (LinearLayout) myLecturesListView.getChildAt(x);
             CheckBox lectureCheckbox = (CheckBox) lectureEntry.getChildAt(0);
 
             // if lecture is selected then insert into DB.
             if (lectureCheckbox.isChecked()) {
+                selectedLectureIds.add(lectureCheckbox.getTag().toString());
                 selectedLectures += lectureCheckbox.getText() + "\n";
             }
         }
@@ -76,14 +89,25 @@ public class MyLecturesActivity extends NavigationBarActivity {
 
         alertDialogBuilder.setMessage(selectedLectures);
 
+        final List<String> lectureIdsToUnsubscribe = selectedLectureIds;
+        final DBHelper dbHelper = new DBHelper(this);
         // set dialog selectedLectures
         alertDialogBuilder
                 .setCancelable(false)
                 .setPositiveButton("Yes",new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog,int id) {
-                        // if this button is clicked, close
-                        // current activity
-                        // TODO: unsubscribe lectures in DB and refresh listview
+                        dbHelper.unsubscribeFromLecture(lectureIdsToUnsubscribe);
+                        // Untag in Pushbots instance to avoid pushed questions related to this lecture.
+                        for (String lectureId : lectureIdsToUnsubscribe) {
+                            Pushbots.sharedInstance().untag("lectureId");
+                        }
+                        // empty and refill list with subscribed lectures entries.
+                        checkboxList = new ArrayList<>();
+                        myLecturesListView.setAdapter(
+                                                    new CustomListAdapter(MyLecturesActivity.this,
+                                                            R.layout.listitemrow, checkboxList));
+                        fillLecturesList();
+                        Toast.makeText(MyLecturesActivity.this, "Subscribed", Toast.LENGTH_SHORT);
                     }
                 })
                 .setNegativeButton("No",new DialogInterface.OnClickListener() {

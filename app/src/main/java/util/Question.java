@@ -6,34 +6,57 @@ package util;
 public class Question {
 
     private int id;
+    private int questionIdLars;
     private int lectureId;
-    private String name;
+    private String sessionId;
+    private String question;
     private boolean isTr;
+    private boolean isMultiSelect;
     private boolean isAnswered;
-    private String imagePath;
+    private String imageUrl;
 
     /**
-     * constructor
+     * Constructor.
      * */
-    public Question(int id, int lectureId, String name, boolean isTr, boolean isAnswered,
-                                                                            String imagePath) {
+    public Question(int id, int questionIdLars, int lectureId, String sessionId, String question, boolean isTr,
+                    boolean isMultiSelect, boolean isAnswered, String imageUrl) {
         this.id = id;
+        this.questionIdLars = questionIdLars;
         this.lectureId = lectureId;
-        this.name = name;
+        this.sessionId = sessionId;
+        this.question = question;
         this.isTr = isTr;
+        this.isMultiSelect = isMultiSelect;
         this.isAnswered = isAnswered;
-        this.imagePath = imagePath;
+        this.imageUrl = imageUrl;
     }
 
-    public String getId() {
+    /**
+     * Constructor.
+     * */
+    public Question(int id, int lectureId, String question, String imageUrl, boolean isTr) {
+        this.id = id;
+        this.lectureId = lectureId;
+        this.question = question;
+        this.imageUrl = imageUrl;
+        this.isTr = isTr;
+    }
+
+    public int getId() {
         return id;
     }
 
-    public String getName() {
-        return name;
+    public String getSessionId() {return  sessionId; }
+
+    public int getQuestionIdLarsId() {
+        return questionIdLars;
     }
 
-    public String getLectureId() {
+    public String getQuestion() {
+        return question;
+    }
+
+    public int getLectureId() {
         return lectureId;
     }
 
@@ -41,11 +64,13 @@ public class Question {
         return isTr;
     }
 
+    public boolean isMultiSelect() {return isMultiSelect; }
+
     public boolean isAnswered() {
         return isAnswered;
     }
 
-    public String getImagePath() {
-        return imagePath;
+    public String getImageUrl() {
+        return imageUrl;
     }
 }

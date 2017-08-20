@@ -4,24 +4,38 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
+import android.content.Intent;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.view.animation.DecelerateInterpolator;
+import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
+import android.widget.TextView;
 
-import com.pushbots.push.Pushbots;
+import com.squareup.picasso.Picasso;
 
-import org.json.JSONArray;
+import java.util.List;
+
+import db.DBHelper;
+import util.Answer;
+import util.Question;
+import util.RestTask;
 
 
 /**
  * This Activity displays a multiple choice or a text response question.
  * User can answer it by clicking on submit button.
  * */
-public class MultipleChoiceActivity extends AppCompatActivity {
+public class AnswerQuestionActivity extends AppCompatActivity {
 
     // Hold a reference to the current animator,
     // so that it can be canceled mid-way.
@@ -32,25 +46,160 @@ public class MultipleChoiceActivity extends AppCompatActivity {
     // very frequently.
     private int mShortAnimationDuration;
 
+    RestTask restTask;
+    private static final String ACTION_FOR_INTENT_CALLBACK = "THIS_IS_A_UNIQUE_KEY_WE_USE_TO_COMMUNICATE";
+
+    DBHelper dbHelper;
+    Question question;
+
+    TextView questionText;
+    LinearLayout multiSelectAnswersLayout ;
+    RadioGroup radioGroupAnswers;
+    EditText textResponseTextField;
+
+    ImageView expandedImageView;
+    String imageUrl = null;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_multiple_choice);
+        setContentView(R.layout.activity_answer_question);
         getSupportActionBar().setTitle(R.string.question);
 
-        // register activity to receive notifications
-        Pushbots.sharedInstance().registerForRemoteNotifications();
+        restTask = new RestTask(this, ACTION_FOR_INTENT_CALLBACK);
 
-        // register for lecture 1
-        JSONArray tags = new JSONArray();
-        tags.put("0");
-        Pushbots.sharedInstance().tag(tags);
+        dbHelper = new DBHelper(this);
+        question = dbHelper.getQuestionById("" + getIntent().getIntExtra("question_id", -1));
+        imageUrl = question.getImageUrl();
 
-        final View thumb1View = findViewById(R.id.multiple_choice_image_button);
-        thumb1View.setOnClickListener(new View.OnClickListener() {
+        questionText = (TextView) findViewById(R.id.multiple_choice_question);
+        questionText.setText(question.getQuestion());
+
+        // set image for this question
+        setImage();
+
+        initQuestionType();
+
+
+    }
+
+    /**
+     * Get Question object.
+     * */
+    public Question getQuestion() {
+        return question;
+    }
+
+    /**
+     * Create the onClickListener for submit button.
+     * This OnClickListener handles every of the three question types.
+     *
+     * @param isTextResponse true if it's a text response question, else false.
+     * @param isMultiSelect true if more than one answer is correct, else false.
+     * @return OnClickListener instance.
+     * */
+    private View.OnClickListener getSubmitOnClickListener(final boolean isTextResponse,
+                                                          final boolean isMultiSelect) {
+        return new View.OnClickListener() {
+            public void onClick(View v) {
+                Intent openQuestionsActivity = new Intent(AnswerQuestionActivity.this, OpenQuestionsActivity.class);
+                AnswerQuestionActivity.this.startActivity(openQuestionsActivity);
+                AnswerQuestionActivity.this.finish();
+
+
+                // iterate all lecture checkboxes
+                String answer = "";
+                // multiple-choice -> multi select
+                if (!isTextResponse && isMultiSelect) {
+                    for (int i = 0; i < multiSelectAnswersLayout.getChildCount(); i++) {
+                        CheckBox checkbox = (CheckBox) multiSelectAnswersLayout.getChildAt(i);
+                        if (checkbox.isChecked()) {
+                            answer += checkbox.getTag() + ",";
+                        }
+                    }
+                // multiple choice -> single select
+                } else if (!isTextResponse && !isMultiSelect) {
+                    for (int i = 0; i < radioGroupAnswers.getChildCount(); i++) {
+                        RadioButton checkbox = (RadioButton) radioGroupAnswers.getChildAt(i);
+                        if (checkbox.isChecked()) {
+                            answer += checkbox.getTag();
+                        }
+                    }
+                // text reponse
+                } else {
+                    answer = textResponseTextField.getText().toString();
+                }
+
+                restTask.submitAnswer(question, answer, isTextResponse);
+            }
+        };
+    }
+
+    /**
+     * different widgets for different types of question.
+     * */
+    private void initQuestionType() {
+        multiSelectAnswersLayout = (LinearLayout) findViewById(R.id.multiSelectAnswersLayout);
+        radioGroupAnswers = (RadioGroup) findViewById(R.id.radioGroupAnswers);
+        textResponseTextField = (EditText) findViewById(R.id.textResponseTextField);
+        Button submitButton = (Button) findViewById(R.id.submit_answer_button);
+        submitButton.setOnClickListener(getSubmitOnClickListener(question.isTr(),
+                question.isMultiSelect()));
+
+        // multiple-choice -> multi select
+        if (!question.isTr() && question.isMultiSelect()) {
+            multiSelectAnswersLayout.setVisibility(View.VISIBLE);
+            radioGroupAnswers.setVisibility(View.GONE);
+            textResponseTextField.setVisibility(View.GONE);
+            // multiple choice -> single select
+        } else if (!question.isTr() && !question.isMultiSelect()) {
+            radioGroupAnswers.setVisibility(View.VISIBLE);
+            multiSelectAnswersLayout.setVisibility(View.GONE);
+            textResponseTextField.setVisibility(View.GONE);
+            // text reponse
+        } else {
+            textResponseTextField.setVisibility(View.VISIBLE);
+            multiSelectAnswersLayout.setVisibility(View.GONE);
+            radioGroupAnswers.setVisibility(View.GONE);
+        }
+
+        // add possible answers to view
+        if (!question.isTr()) {
+            List<Answer> possibleAnswers = dbHelper.getAnswersOfQuestion(question.getId());
+            // it's a multiple choice question
+            for (Answer answer : possibleAnswers) {
+                // just one answer is correct
+                if (!question.isTr() && !question.isMultiSelect()) {
+                    RadioButton button = new RadioButton(this);
+                    button.setText(answer.getAnswer());
+                    button.setTag(answer.getId());
+                    button.setTextSize(18);
+                    radioGroupAnswers.addView(button);
+                    // more than one answer is correct
+                } else if (!question.isTr() && question.isMultiSelect()){
+                    CheckBox checkbox = new CheckBox(this);
+                    checkbox.setText(answer.getAnswer());
+                    checkbox.setTag(answer.getId());
+                    checkbox.setTextSize(18);
+                    multiSelectAnswersLayout.addView(checkbox);
+                }
+            }
+        }
+    }
+
+    /**
+     * Set the image for this question if there is any.
+     * */
+    private void setImage() {
+        final ImageButton smallQuestionImage = (ImageButton) findViewById(R.id.multiple_choice_image_button);
+        Picasso.with(this)
+                .load(question.getImageUrl()).fit()
+                .into(smallQuestionImage);
+
+        smallQuestionImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                zoomImageFromThumb(thumb1View, R.drawable.pikachu);
+                zoomImageFromThumb(smallQuestionImage);
             }
         });
 
@@ -63,19 +212,18 @@ public class MultipleChoiceActivity extends AppCompatActivity {
      * Make Picture from question full sized.
      *
      * @param thumbView where full size picture will be displayed.
-     * @param imageResId resource id of image which will be displayed in that thumbview.
      * */
-    private void zoomImageFromThumb(final View thumbView, int imageResId) {
+    private void zoomImageFromThumb(final View thumbView) {
         // If there's an animation in progress, cancel it
         // immediately and proceed with this one.
         if (mCurrentAnimator != null) {
             mCurrentAnimator.cancel();
         }
 
-        // Load the high-resolution "zoomed-in" image.
-        final ImageView expandedImageView = (ImageView) findViewById(
-                R.id.expanded_multiple_choice_image);
-        expandedImageView.setImageResource(imageResId);
+        expandedImageView = (ImageView) findViewById(R.id.expanded_multiple_choice_image);
+        Picasso.with(this)
+                .load(imageUrl)
+                .into(expandedImageView);
 
         // Calculate the starting and ending bounds for the zoomed-in image.
         // This step involves lots of math. Yay, math.

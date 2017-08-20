@@ -24,7 +24,7 @@
             android:name=".FindLecturesActivity"
             android:label="@string/title_activity_main2"
             android:theme="@style/AppTheme.NoActionBar"></activity>
-        <activity android:name=".MultipleChoiceActivity" />
+        <activity android:name=".AnswerQuestionActivity" />
         <activity
             android:name=".MyLecturesActivity"
             android:theme="@style/AppTheme.NoActionBar">
@@ -34,7 +34,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".CurrentSurveyActivity"
+        <activity android:name=".OpenQuestionsActivity"
             android:theme="@style/AppTheme.NoActionBar"></activity>
     </application>
 

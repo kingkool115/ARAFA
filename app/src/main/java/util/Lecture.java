@@ -7,13 +7,13 @@ package util;
 public class Lecture {
 
     private String name;
-    private String id;
+    private int id;
 
 
     /**
      * Constructor used to display list view.
      * */
-    public Lecture(String name, String id) {
+    public Lecture(String name, int id) {
         this.name = name;
         this.id = id;
     }
@@ -22,7 +22,7 @@ public class Lecture {
         return name;
     }
 
-    public String getId() {
+    public int getId() {
         return id;
     }
 }

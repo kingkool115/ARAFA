@@ -5,13 +5,13 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.provider.ContactsContract;
 
 import java.util.LinkedList;
 import java.util.List;
 
 import util.Answer;
 import util.Lecture;
+import util.Question;
 
 /**
  * Diese Klasse hilft uns dabei Datenbankzugriffe auszuführen.
@@ -38,13 +38,15 @@ public class DBHelper extends SQLiteOpenHelper{
      */
     private static final String CREATE_TABLE_QUESTION =
             "CREATE TABLE " + DatabaseTable.Question.TABLE_NAME + " (" +
-                    DatabaseTable.Question.COLUMN_ID + INTEGER_TYPE + "," +
+                    DatabaseTable.Question.COLUMN_ID + INTEGER_TYPE + " PRIMARY KEY AUTOINCREMENT," +
+                    DatabaseTable.Question.COLUMN_QUESTION_ID_LARS + INTEGER_TYPE + " ," +
                     DatabaseTable.Question.COLUMN_LECTURE_ID + INTEGER_TYPE + "," +
-                    DatabaseTable.Question.COLUMN_SESSION_ID + INTEGER_TYPE + "," +
+                    DatabaseTable.Question.COLUMN_SESSION_ID + TEXT_TYPE + "," +
                     DatabaseTable.Question.COLUMN_QUESTION + TEXT_TYPE + "," +
                     DatabaseTable.Question.COLUMN_IS_TR + BOOLEAN_TYPE + "," +
+                    DatabaseTable.Question.COLUMN_IS_MULTI_SELECT + BOOLEAN_TYPE + "," +
                     DatabaseTable.Question.COLUMN_IS_ANSWERED + BOOLEAN_TYPE + "," +
-                    DatabaseTable.Question.COLUMN_IMAGE_PATH + TEXT_TYPE + " )";
+                    DatabaseTable.Question.COLUMN_IMAGE_URL + TEXT_TYPE + " )";
 
     /**
      * Create table 'answers'.
@@ -73,9 +75,40 @@ public class DBHelper extends SQLiteOpenHelper{
             " FROM " + DatabaseTable.Subscription.TABLE_NAME;
 
     /**
+    * Get a question by its id.
+    * **/
+    private static final String SELECT_ANSWERS_OF_QUESTION =
+            "SELECT * FROM " + DatabaseTable.Answer.TABLE_NAME + " WHERE question_id = ?";
+
+    /**
+     * Get questions
+     * **/
+    private static final String SELECT_QUESTION_BY_ID =
+            "SELECT * FROM " + DatabaseTable.Question.TABLE_NAME + " WHERE id = ?";
+
+    /**
+     * Get lecture.
+     * **/
+    private static final String SELECT_LECTURE_BY_ID =
+            "SELECT * FROM " + DatabaseTable.Subscription.TABLE_NAME + " WHERE id = ?";
+
+    /**
+     * Get possible answers of a question.
+     * **/
+    private static final String SELECT_QUESTION_BY_LARS_ID =
+            "SELECT * FROM " + DatabaseTable.Question.TABLE_NAME + " WHERE question_id_lars = ?";
+
+    /**
+     * Get possible answers of a question.
+     * **/
+    private static final String SELECT_UNANSWERED_QUESTIONS =
+            "SELECT * FROM " + DatabaseTable.Question.TABLE_NAME + " WHERE is_answered = 0";
+
+    /**
      * Drop table 'profile'
      */
-    private static final String SQL_DELETE_PROFILES = "DROP TABLE IF EXISTS " + DatabaseTable.Subscription.TABLE_NAME;
+    private static final String SQL_DELETE_PROFILES =
+            "DROP TABLE IF EXISTS " + DatabaseTable.Subscription.TABLE_NAME;
 
     /**
      * Constructor
@@ -126,10 +159,25 @@ public class DBHelper extends SQLiteOpenHelper{
 
     /**
      * Unsubscribe from lecture.
+     *
+     * @param lectureIds List of lecture ids which should be removed.
      * */
-    public void unsubscribeFromLecture(String id) {
+    public void unsubscribeFromLecture(List<String> lectureIds) {
         SQLiteDatabase db = this.getWritableDatabase();
-        db.delete(DatabaseTable.Subscription.TABLE_NAME, "id=?",new String[]{id});
+        // remove lecture from subscription table
+        List<Integer> deletedQuestionIds = new LinkedList<>();
+        for (String lectureId : lectureIds) {
+            // remove lecture from subscription table
+            db.delete(DatabaseTable.Subscription.TABLE_NAME, "id=?",new String[]{lectureId});
+            // remove questions related to that lecture
+            int questionId = db.delete(DatabaseTable.Question.TABLE_NAME, "lecture_id=?",new String[]{lectureId});
+            deletedQuestionIds.add(questionId);
+        }
+        // remove answers related to deleted questions
+        for (int questionId : deletedQuestionIds) {
+            db.delete(DatabaseTable.Answer.TABLE_NAME, "question_id=?",new String[]{"" + questionId});
+        }
+        db.close();
     }
 
     /**
@@ -140,10 +188,10 @@ public class DBHelper extends SQLiteOpenHelper{
     public List<Lecture> getSubscribedLectures() {
         List<Lecture> result = new LinkedList<>();
         SQLiteDatabase db = getReadableDatabase();
-        Cursor cursor = db.rawQuery(SELECT_ONE_SUBSCRIBED_LECTURE, null);
+        Cursor cursor = db.rawQuery(SELECT_ALL_SUBSCRIBED_LECTURES, null);
         try {
             while (cursor.moveToNext()) {
-                String lectureId = cursor.getString(cursor.getColumnIndex(DatabaseTable.Subscription.COLUMN_LECTURE_ID));
+                int lectureId = cursor.getInt(cursor.getColumnIndex(DatabaseTable.Subscription.COLUMN_LECTURE_ID));
                 String lectureName = cursor.getString(cursor.getColumnIndex(DatabaseTable.Subscription.COLUMN_LECTURE_NAME));
                 result.add(new Lecture(lectureName, lectureId));
             }
@@ -154,19 +202,121 @@ public class DBHelper extends SQLiteOpenHelper{
     }
 
     /**
+     * Get a lecture by its id.
+     *
+     * @param id of the lecture.
+     **/
+    public Lecture getLectureyId(int id) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery(SELECT_LECTURE_BY_ID, new String[] {"" + id});
+        try {
+            while (cursor.moveToNext()) {
+                int lectureId = cursor.getInt(cursor.getColumnIndex(DatabaseTable.Subscription.COLUMN_LECTURE_ID));
+                String name = cursor.getString(cursor.getColumnIndex(DatabaseTable.Subscription.COLUMN_LECTURE_NAME));
+                return new Lecture(name, lectureId);
+            }
+        } finally {
+            cursor.close();
+        }
+        return null;
+    }
+
+    /**
+     * Get a question by its id.
+     *
+     * @param id of the question.
+     **/
+    public Question getQuestionById(String id) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery(SELECT_QUESTION_BY_ID, new String[] {id});
+        try {
+            while (cursor.moveToNext()) {
+                int questionId = cursor.getInt(cursor.getColumnIndex(DatabaseTable.Question.COLUMN_ID));
+                int questionIdLars = cursor.getInt(cursor.getColumnIndex(DatabaseTable.Question.COLUMN_QUESTION_ID_LARS));
+                String question = cursor.getString(cursor.getColumnIndex(DatabaseTable.Question.COLUMN_QUESTION));
+                String sessionId = cursor.getString(cursor.getColumnIndex(DatabaseTable.Question.COLUMN_SESSION_ID));
+                int lectureId = cursor.getInt(cursor.getColumnIndex(DatabaseTable.Question.COLUMN_LECTURE_ID));
+                boolean isTextResponse = 1 == cursor.getInt(cursor.getColumnIndex(DatabaseTable.Question.COLUMN_IS_TR));
+                boolean isMultiSelect = 1 == cursor.getInt(cursor.getColumnIndex(DatabaseTable.Question.COLUMN_IS_MULTI_SELECT));
+                boolean isAnswered = 1 == cursor.getInt(cursor.getColumnIndex(DatabaseTable.Question.COLUMN_IS_ANSWERED));
+                String imageURL = cursor.getString(cursor.getColumnIndex(DatabaseTable.Question.COLUMN_IMAGE_URL));
+                return new Question(questionId, questionIdLars, lectureId, sessionId, question, isTextResponse, isMultiSelect, isAnswered, imageURL);
+            }
+        } finally {
+            cursor.close();
+        }
+        return null;
+    }
+
+    /**
+     * Get all questions which are not answered yet.
+     *
+     * @return a list with Question objects.
+     * */
+    public List<Question> getUnansweredQuestions() {
+        List<Question> result = new LinkedList<>();
+        SQLiteDatabase db = getReadableDatabase();
+        Cursor cursor = db.rawQuery(SELECT_UNANSWERED_QUESTIONS, null);
+        try {
+            while (cursor.moveToNext()) {
+                int id = cursor.getInt(cursor.getColumnIndex(DatabaseTable.Question.COLUMN_ID));
+                int lectureId = cursor.getInt(cursor.getColumnIndex(DatabaseTable.Question.COLUMN_LECTURE_ID));
+                String question = cursor.getString(cursor.getColumnIndex(DatabaseTable.Question.COLUMN_QUESTION));
+                String imageUrl = cursor.getString(cursor.getColumnIndex(DatabaseTable.Question.COLUMN_IMAGE_URL));
+                boolean isTr = Boolean.parseBoolean(cursor.getString(cursor.getColumnIndex(DatabaseTable.Question.COLUMN_IS_TR)));
+                result.add(new Question(id, lectureId, question, imageUrl, isTr));
+            }
+        } finally {
+            cursor.close();
+        }
+        return result;
+    }
+
+    /**
+     * Get a question by its id.
+     *
+     * @param id of the question.
+     **/
+    public Question getQuestionByLarsId(String id) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery(SELECT_QUESTION_BY_LARS_ID, new String[] {id});
+        try {
+            while (cursor.moveToNext()) {
+                int questionId = cursor.getInt(cursor.getColumnIndex(DatabaseTable.Question.COLUMN_ID));
+                int questionIdLars = cursor.getInt(cursor.getColumnIndex(DatabaseTable.Question.COLUMN_QUESTION_ID_LARS));
+                String question = cursor.getString(cursor.getColumnIndex(DatabaseTable.Question.COLUMN_QUESTION));
+                String sessionId = cursor.getString(cursor.getColumnIndex(DatabaseTable.Question.COLUMN_SESSION_ID));
+                int lectureId = cursor.getInt(cursor.getColumnIndex(DatabaseTable.Question.COLUMN_LECTURE_ID));
+                boolean isTextResponse = Boolean.parseBoolean(cursor.getString(cursor.getColumnIndex(DatabaseTable.Question.COLUMN_IS_TR)));
+                boolean isMultiSelect = Boolean.parseBoolean(cursor.getString(cursor.getColumnIndex(DatabaseTable.Question.COLUMN_IS_MULTI_SELECT)));
+                boolean isAnswered = Boolean.parseBoolean(cursor.getString(cursor.getColumnIndex(DatabaseTable.Question.COLUMN_IS_ANSWERED)));
+                String imageURL = cursor.getString(cursor.getColumnIndex(DatabaseTable.Question.COLUMN_IMAGE_URL));
+                return new Question(questionId, questionIdLars, lectureId, sessionId, question, isTextResponse, isMultiSelect,isAnswered, imageURL);
+            }
+        } finally {
+            cursor.close();
+        }
+        return null;
+    }
+
+    /**
      * Save received question into db.
      * */
-    public void receiveQuestion(int id, int lectureId, String question, boolean isTr, String imagePath) {
+    public long receiveQuestion(int questionIdLars, int lectureId, String sessionId, String question, int isTr,
+                                int is_multi_select, String imageURL) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues insertValues = new ContentValues();
-        insertValues.put(DatabaseTable.Question.COLUMN_ID, id);
+        insertValues.put(DatabaseTable.Question.COLUMN_QUESTION_ID_LARS, questionIdLars);
         insertValues.put(DatabaseTable.Question.COLUMN_LECTURE_ID, lectureId);
         insertValues.put(DatabaseTable.Question.COLUMN_QUESTION, question);
-        insertValues.put(DatabaseTable.Question.COLUMN_IS_TR, isTr);
+        insertValues.put(DatabaseTable.Question.COLUMN_SESSION_ID, sessionId);
+        insertValues.put(DatabaseTable.Question.COLUMN_IS_TR, isTr);    // boolean
+        insertValues.put(DatabaseTable.Question.COLUMN_IS_MULTI_SELECT, is_multi_select);    // boolean
         insertValues.put(DatabaseTable.Question.COLUMN_IS_ANSWERED, 0);
-        insertValues.put(DatabaseTable.Question.COLUMN_IMAGE_PATH, imagePath);
-        db.insert(DatabaseTable.Question.TABLE_NAME, null, insertValues);
+        insertValues.put(DatabaseTable.Question.COLUMN_IMAGE_URL, imageURL);
+        long questionId = db.insert(DatabaseTable.Question.TABLE_NAME, null, insertValues);
         db.close();
+        return questionId;
     }
 
     /**
@@ -176,7 +326,7 @@ public class DBHelper extends SQLiteOpenHelper{
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues cv = new ContentValues();
         cv.put(DatabaseTable.Question.COLUMN_IS_ANSWERED, 1);
-        db.update(DatabaseTable.Question.TABLE_NAME, cv, "_id = ?", new String[]{"" + questionId});
+        db.update(DatabaseTable.Question.TABLE_NAME, cv, "id = ?", new String[]{"" + questionId});
         db.close();
     }
 
@@ -196,7 +346,33 @@ public class DBHelper extends SQLiteOpenHelper{
     }
 
     /**
-     * Return if Sound is turned on/off.
+     * Get a list of all possible multiple choice answers of a question.
+     *
+     * @param questionId if of the question.
+     * @return a List of object Answer
+     * */
+    public List<Answer> getAnswersOfQuestion(int questionId ) {
+        List<Answer> answers = new LinkedList<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery(SELECT_ANSWERS_OF_QUESTION, new String[] {"" + questionId});
+        try {
+            while (cursor.moveToNext()) {
+                int answerId = cursor.getInt(cursor.getColumnIndex(DatabaseTable.Answer.COLUMN_ID));
+                int idOfQuestion = cursor.getInt(cursor.getColumnIndex(DatabaseTable.Answer.COLUMN_QUESTION_ID));
+                String answer = cursor.getString(cursor.getColumnIndex(DatabaseTable.Answer.COLUMN_ANSWER));
+                answers.add(new Answer(answerId, idOfQuestion, answer));
+            }
+        } finally {
+            cursor.close();
+        }
+        return answers;
+    }
+
+    /**
+     * Check if subscribed for a given lecture.
+     *
+     * @param id check this id if available in SUBSCRIPTION table.
+     * @return true if id exits in table SUBSCRIPTION, else false.
      */
     public boolean lectureExists(String id) {
         SQLiteDatabase db = getReadableDatabase();

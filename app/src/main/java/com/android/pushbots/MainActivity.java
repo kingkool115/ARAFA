@@ -29,7 +29,7 @@ public class MainActivity extends AppCompatActivity {
         Context context = getApplicationContext();
         CharSequence text = "Hello MainActiivty!";
         int duration = Toast.LENGTH_SHORT;
-        Pushbots.sharedInstance().setCustomHandler(customHandler.class);
+        //Pushbots.sharedInstance().setCustomHandler(customHandler.class);
         Toast toast = Toast.makeText(context, text, duration);
         toast.show();
         String token = Pushbots.sharedInstance().getGCMRegistrationId();
