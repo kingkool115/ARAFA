@@ -54,8 +54,8 @@ public class customHandler extends BroadcastReceiver
         try {
             jsonQuestion = new JSONObject(bundle.getString("question"));
             sessionId = bundle.getString("session_id");
-            questionId = jsonQuestion.getString("id");
-            question = dbHelper.getQuestionByLarsId(questionId);
+            questionId = jsonQuestion.getString("question_uid");
+            question = dbHelper.getQuestionById(questionId);
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -69,13 +69,7 @@ public class customHandler extends BroadcastReceiver
             Log.i(TAG, "User clicked notification with Message: " + bundle.get("message"));
 
             // create new intent for activity that will show the question
-            Intent answerQuestionIntent = null;
-            if (question.isTr()) {
-                // TODO: activity for text response
-                // answerQuestionIntent = new Intent(context, AnswerQuestionActivity.class);
-            } else {
-                answerQuestionIntent = new Intent(context, AnswerQuestionActivity.class);
-            }
+            Intent answerQuestionIntent = new Intent(context, AnswerQuestionActivity.class);
             answerQuestionIntent.putExtra("question_id", question.getId());
 
             //Open activity or URL with pushData.
@@ -91,7 +85,8 @@ public class customHandler extends BroadcastReceiver
 
             try {
                 // save question into DB
-                int newQuestionId = (int) dbHelper.receiveQuestion(
+                dbHelper.receiveQuestion(
+                        jsonQuestion.getString("question_uid"),
                         Integer.parseInt(jsonQuestion.getString("id")),
                         Integer.parseInt(jsonQuestion.getString("lecture_id")),
                         sessionId,
@@ -101,8 +96,6 @@ public class customHandler extends BroadcastReceiver
                         jsonQuestion.getString("image_path")
                 );
 
-                lastQuestionId = newQuestionId;
-
                 // save related answers into DB
                 JSONArray jsonArray = new JSONArray(bundle.getString("answers"));
                 List<Answer> answers = new LinkedList<>();
@@ -110,7 +103,7 @@ public class customHandler extends BroadcastReceiver
                     JSONObject jsonAnswer = (JSONObject)jsonArray.get(x);
                     int id = Integer.parseInt(jsonAnswer.getString("id"));
                     String answer = jsonAnswer.getString("answer");
-                    answers.add(new Answer(id, newQuestionId, answer));
+                    answers.add(new Answer(id, jsonQuestion.getString("question_uid"), answer));
                 }
                 dbHelper.receiveAnswers(answers);
 

@@ -72,8 +72,6 @@ public class NavigationBarActivity extends AppCompatActivity
             intent = new Intent(getApplicationContext(), FindLecturesActivity.class);
         } else if (id == R.id.my_lectures) {
             intent = new Intent(getApplicationContext(), MyLecturesActivity.class);
-        } else if (id == R.id.multiple_choice) {
-            intent = new Intent(getApplicationContext(), AnswerQuestionActivity.class);
         } else if (id == R.id.current_survey) {
             intent = new Intent(getApplicationContext(), OpenQuestionsActivity.class);
         }

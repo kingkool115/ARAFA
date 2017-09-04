@@ -9,6 +9,7 @@ import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.BasicResponseHandler;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import android.app.Activity;
@@ -25,6 +26,7 @@ import com.android.pushbots.R;
 import com.pushbots.push.Pushbots;
 
 import java.net.URI;
+import java.util.List;
 
 import db.DBHelper;
 
@@ -39,6 +41,8 @@ public class RestTask extends AsyncTask<HttpUriRequest, Void, String>
     // TODO: change this url
     private final String URL_LECTURES = "http://192.168.178.26:8000/lectures";
     private final String URL_ANSWER_QUESTION = "http://192.168.178.26:8000/api/answer_question";
+    private final String URL_SUBSCRIBE = "http://192.168.178.26:8000/api/subscribe";
+    private final String URL_UNSUBSCRIBE = "http://192.168.178.26:8000/api/unsubscribe";
 
     private Context mContext;
     private HttpClient mClient;
@@ -80,6 +84,50 @@ public class RestTask extends AsyncTask<HttpUriRequest, Void, String>
     }
 
     /**
+     * Unsubscribe the lectures from Webservice.
+     * */
+    public void unsubscribeLectures(JSONArray lectureIds) {
+        subscribeAndUnsubscribe(lectureIds, false);
+    }
+
+    /**
+     * Subscribe to the lectures in Webservice.
+     *
+     * @param lectureIds list of lectureIds which should be subscribed.
+     * */
+    public void subscribeLectures(JSONArray lectureIds) {
+        subscribeAndUnsubscribe(lectureIds, true);
+    }
+
+    /**
+     * Executes subscribe/unsubscribe http request.
+     *
+     * @param lectureIds lectureIds which should be subscribed/unsubscribed
+     * @param subscribe true if subscribe given lectureIds, else unsubscribe them.
+     * */
+    private void subscribeAndUnsubscribe(JSONArray lectureIds, boolean subscribe) {
+        try {
+            HttpPost httpPost;
+            if (subscribe) {
+                httpPost = new HttpPost(new URI(URL_SUBSCRIBE));
+            } else {
+                httpPost = new HttpPost(new URI(URL_UNSUBSCRIBE));
+            }
+            httpPost.addHeader("Content-Type", "application/json");
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put("lecture_ids", lectureIds);
+            jsonObject.put("student_id", Pushbots.sharedInstance().getUserId());
+            StringEntity params = new StringEntity(jsonObject.toString());
+            httpPost.setEntity(params);
+            execute(httpPost);
+            progressDialog = getProgressDialog();
+            progressDialog.show();
+        } catch (Exception e) {
+            Log.e("Error", e.getMessage());
+        }
+    }
+
+    /**
      * Submit an answer.
      * */
     public void submitAnswer(Question question, String answer, boolean is_text_response) {
@@ -92,7 +140,7 @@ public class RestTask extends AsyncTask<HttpUriRequest, Void, String>
             jsonObject.put("lecture_id", question.getLectureId());
             jsonObject.put("student_id", Pushbots.sharedInstance().getUserId());
             jsonObject.put("session_id", question.getSessionId());
-            jsonObject.put("question_id", question.getId());
+            jsonObject.put("question_id", question.getQuestionIdLarsId());
             jsonObject.put("is_text_response", question.isTr());
             if (is_text_response) {
                 jsonObject.put("answer", answer);
@@ -102,8 +150,6 @@ public class RestTask extends AsyncTask<HttpUriRequest, Void, String>
             StringEntity params = new StringEntity(jsonObject.toString());
             httpPost.setEntity(params);
             execute(httpPost);
-            progressDialog = getProgressDialog();
-            progressDialog.show();
         }
         catch (Exception e)
         {
@@ -176,7 +222,6 @@ public class RestTask extends AsyncTask<HttpUriRequest, Void, String>
             AnswerQuestionActivity activity = (AnswerQuestionActivity) mContext;
             DBHelper dbHelper = new DBHelper(activity);
             dbHelper.questionAnswered(activity.getQuestion().getId());
-            progressDialog.dismiss();
         }
 
         // broadcast the completion

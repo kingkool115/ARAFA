@@ -21,6 +21,7 @@ import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
 
+import com.amitshekhar.DebugDB;
 import com.squareup.picasso.Picasso;
 
 import java.util.List;
@@ -69,7 +70,7 @@ public class AnswerQuestionActivity extends AppCompatActivity {
         restTask = new RestTask(this, ACTION_FOR_INTENT_CALLBACK);
 
         dbHelper = new DBHelper(this);
-        question = dbHelper.getQuestionById("" + getIntent().getIntExtra("question_id", -1));
+        question = dbHelper.getQuestionById(getIntent().getStringExtra("question_id"));
         imageUrl = question.getImageUrl();
 
         questionText = (TextView) findViewById(R.id.multiple_choice_question);
@@ -102,9 +103,6 @@ public class AnswerQuestionActivity extends AppCompatActivity {
                                                           final boolean isMultiSelect) {
         return new View.OnClickListener() {
             public void onClick(View v) {
-                Intent openQuestionsActivity = new Intent(AnswerQuestionActivity.this, OpenQuestionsActivity.class);
-                AnswerQuestionActivity.this.startActivity(openQuestionsActivity);
-                AnswerQuestionActivity.this.finish();
 
 
                 // iterate all lecture checkboxes
@@ -131,6 +129,13 @@ public class AnswerQuestionActivity extends AppCompatActivity {
                 }
 
                 restTask.submitAnswer(question, answer, isTextResponse);
+
+                // TODO: check if submitting was successful than remove from DB
+                dbHelper.questionAnswered(question.getId());
+
+                Intent openQuestionsActivity = new Intent(AnswerQuestionActivity.this, OpenQuestionsActivity.class);
+                AnswerQuestionActivity.this.startActivity(openQuestionsActivity);
+                AnswerQuestionActivity.this.finish();
             }
         };
     }

@@ -38,7 +38,7 @@ public class DBHelper extends SQLiteOpenHelper{
      */
     private static final String CREATE_TABLE_QUESTION =
             "CREATE TABLE " + DatabaseTable.Question.TABLE_NAME + " (" +
-                    DatabaseTable.Question.COLUMN_ID + INTEGER_TYPE + " PRIMARY KEY AUTOINCREMENT," +
+                    DatabaseTable.Question.COLUMN_ID + TEXT_TYPE + " ," +
                     DatabaseTable.Question.COLUMN_QUESTION_ID_LARS + INTEGER_TYPE + " ," +
                     DatabaseTable.Question.COLUMN_LECTURE_ID + INTEGER_TYPE + "," +
                     DatabaseTable.Question.COLUMN_SESSION_ID + TEXT_TYPE + "," +
@@ -54,7 +54,7 @@ public class DBHelper extends SQLiteOpenHelper{
     private static final String CREATE_TABLE_ANSWER =
             "CREATE TABLE " + DatabaseTable.Answer.TABLE_NAME + " (" +
                     DatabaseTable.Answer.COLUMN_ID + INTEGER_TYPE + "," +
-                    DatabaseTable.Answer.COLUMN_QUESTION_ID + INTEGER_TYPE + "," +
+                    DatabaseTable.Answer.COLUMN_QUESTION_ID + TEXT_TYPE + "," +
                     DatabaseTable.Answer.COLUMN_ANSWER + TEXT_TYPE + " )";
 
     /**
@@ -231,7 +231,7 @@ public class DBHelper extends SQLiteOpenHelper{
         Cursor cursor = db.rawQuery(SELECT_QUESTION_BY_ID, new String[] {id});
         try {
             while (cursor.moveToNext()) {
-                int questionId = cursor.getInt(cursor.getColumnIndex(DatabaseTable.Question.COLUMN_ID));
+                String questionId = cursor.getString(cursor.getColumnIndex(DatabaseTable.Question.COLUMN_ID));
                 int questionIdLars = cursor.getInt(cursor.getColumnIndex(DatabaseTable.Question.COLUMN_QUESTION_ID_LARS));
                 String question = cursor.getString(cursor.getColumnIndex(DatabaseTable.Question.COLUMN_QUESTION));
                 String sessionId = cursor.getString(cursor.getColumnIndex(DatabaseTable.Question.COLUMN_SESSION_ID));
@@ -259,7 +259,7 @@ public class DBHelper extends SQLiteOpenHelper{
         Cursor cursor = db.rawQuery(SELECT_UNANSWERED_QUESTIONS, null);
         try {
             while (cursor.moveToNext()) {
-                int id = cursor.getInt(cursor.getColumnIndex(DatabaseTable.Question.COLUMN_ID));
+                String id = cursor.getString(cursor.getColumnIndex(DatabaseTable.Question.COLUMN_ID));
                 int lectureId = cursor.getInt(cursor.getColumnIndex(DatabaseTable.Question.COLUMN_LECTURE_ID));
                 String question = cursor.getString(cursor.getColumnIndex(DatabaseTable.Question.COLUMN_QUESTION));
                 String imageUrl = cursor.getString(cursor.getColumnIndex(DatabaseTable.Question.COLUMN_IMAGE_URL));
@@ -282,7 +282,7 @@ public class DBHelper extends SQLiteOpenHelper{
         Cursor cursor = db.rawQuery(SELECT_QUESTION_BY_LARS_ID, new String[] {id});
         try {
             while (cursor.moveToNext()) {
-                int questionId = cursor.getInt(cursor.getColumnIndex(DatabaseTable.Question.COLUMN_ID));
+                String questionId = cursor.getString(cursor.getColumnIndex(DatabaseTable.Question.COLUMN_ID));
                 int questionIdLars = cursor.getInt(cursor.getColumnIndex(DatabaseTable.Question.COLUMN_QUESTION_ID_LARS));
                 String question = cursor.getString(cursor.getColumnIndex(DatabaseTable.Question.COLUMN_QUESTION));
                 String sessionId = cursor.getString(cursor.getColumnIndex(DatabaseTable.Question.COLUMN_SESSION_ID));
@@ -302,10 +302,11 @@ public class DBHelper extends SQLiteOpenHelper{
     /**
      * Save received question into db.
      * */
-    public long receiveQuestion(int questionIdLars, int lectureId, String sessionId, String question, int isTr,
+    public void receiveQuestion(String questionId, int questionIdLars, int lectureId, String sessionId, String question, int isTr,
                                 int is_multi_select, String imageURL) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues insertValues = new ContentValues();
+        insertValues.put(DatabaseTable.Question.COLUMN_ID, questionId);
         insertValues.put(DatabaseTable.Question.COLUMN_QUESTION_ID_LARS, questionIdLars);
         insertValues.put(DatabaseTable.Question.COLUMN_LECTURE_ID, lectureId);
         insertValues.put(DatabaseTable.Question.COLUMN_QUESTION, question);
@@ -314,15 +315,14 @@ public class DBHelper extends SQLiteOpenHelper{
         insertValues.put(DatabaseTable.Question.COLUMN_IS_MULTI_SELECT, is_multi_select);    // boolean
         insertValues.put(DatabaseTable.Question.COLUMN_IS_ANSWERED, 0);
         insertValues.put(DatabaseTable.Question.COLUMN_IMAGE_URL, imageURL);
-        long questionId = db.insert(DatabaseTable.Question.TABLE_NAME, null, insertValues);
+        db.insert(DatabaseTable.Question.TABLE_NAME, null, insertValues);
         db.close();
-        return questionId;
     }
 
     /**
      * Set is_answered=true in questions table when student send his answer.
      * */
-    public void questionAnswered(int questionId) {
+    public void questionAnswered(String questionId) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues cv = new ContentValues();
         cv.put(DatabaseTable.Question.COLUMN_IS_ANSWERED, 1);
@@ -351,14 +351,14 @@ public class DBHelper extends SQLiteOpenHelper{
      * @param questionId if of the question.
      * @return a List of object Answer
      * */
-    public List<Answer> getAnswersOfQuestion(int questionId ) {
+    public List<Answer> getAnswersOfQuestion(String questionId ) {
         List<Answer> answers = new LinkedList<>();
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.rawQuery(SELECT_ANSWERS_OF_QUESTION, new String[] {"" + questionId});
+        Cursor cursor = db.rawQuery(SELECT_ANSWERS_OF_QUESTION, new String[] {questionId});
         try {
             while (cursor.moveToNext()) {
                 int answerId = cursor.getInt(cursor.getColumnIndex(DatabaseTable.Answer.COLUMN_ID));
-                int idOfQuestion = cursor.getInt(cursor.getColumnIndex(DatabaseTable.Answer.COLUMN_QUESTION_ID));
+                String idOfQuestion = cursor.getString(cursor.getColumnIndex(DatabaseTable.Answer.COLUMN_QUESTION_ID));
                 String answer = cursor.getString(cursor.getColumnIndex(DatabaseTable.Answer.COLUMN_ANSWER));
                 answers.add(new Answer(answerId, idOfQuestion, answer));
             }

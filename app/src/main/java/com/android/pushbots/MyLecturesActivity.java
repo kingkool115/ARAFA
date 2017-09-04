@@ -12,6 +12,8 @@ import android.widget.Toast;
 
 import com.pushbots.push.Pushbots;
 
+import org.json.JSONArray;
+
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -19,6 +21,7 @@ import java.util.List;
 import db.DBHelper;
 import util.CustomListAdapter;
 import util.Lecture;
+import util.RestTask;
 
 
 /**
@@ -27,6 +30,8 @@ import util.Lecture;
  *
  * */
 public class MyLecturesActivity extends NavigationBarActivity {
+
+    static final String ACTION_FOR_INTENT_CALLBACK = "THIS_IS_A_UNIQUE_KEY_WE_USE_TO_COMMUNICATE";
 
     ListView myLecturesListView;
     ArrayList<Lecture> checkboxList;
@@ -97,6 +102,14 @@ public class MyLecturesActivity extends NavigationBarActivity {
                 .setCancelable(false)
                 .setPositiveButton("Yes",new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog,int id) {
+                        RestTask restTask = new RestTask(MyLecturesActivity.this, MyLecturesActivity.this.ACTION_FOR_INTENT_CALLBACK);
+                        JSONArray jsonArrayLectureIds = new JSONArray();
+                        for (String lectureId : lectureIdsToUnsubscribe) {
+                            jsonArrayLectureIds.put(lectureId);
+                        }
+                        // TODO: unsubscribe in DB only when unsubscription in Webservice was susccessful.
+                        restTask.unsubscribeLectures(jsonArrayLectureIds);
+
                         dbHelper.unsubscribeFromLecture(lectureIdsToUnsubscribe);
                         // Untag in Pushbots instance to avoid pushed questions related to this lecture.
                         for (String lectureId : lectureIdsToUnsubscribe) {

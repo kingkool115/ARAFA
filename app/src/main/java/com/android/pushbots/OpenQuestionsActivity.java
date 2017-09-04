@@ -126,7 +126,6 @@ public class OpenQuestionsActivity extends NavigationBarActivity {
                         Intent questionActivity;
                         questionActivity = new Intent(OpenQuestionsActivity.this, AnswerQuestionActivity.class);
                         questionActivity.putExtra("question_id", q.getId());
-                        questionActivity.putExtra("question_id", q.getId());
                         OpenQuestionsActivity.this.startActivity(questionActivity);
                     }
                 });

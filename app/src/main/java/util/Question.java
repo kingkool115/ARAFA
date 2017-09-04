@@ -5,7 +5,7 @@ package util;
  * */
 public class Question {
 
-    private int id;
+    private String id;
     private int questionIdLars;
     private int lectureId;
     private String sessionId;
@@ -18,7 +18,7 @@ public class Question {
     /**
      * Constructor.
      * */
-    public Question(int id, int questionIdLars, int lectureId, String sessionId, String question, boolean isTr,
+    public Question(String id, int questionIdLars, int lectureId, String sessionId, String question, boolean isTr,
                     boolean isMultiSelect, boolean isAnswered, String imageUrl) {
         this.id = id;
         this.questionIdLars = questionIdLars;
@@ -34,7 +34,7 @@ public class Question {
     /**
      * Constructor.
      * */
-    public Question(int id, int lectureId, String question, String imageUrl, boolean isTr) {
+    public Question(String id, int lectureId, String question, String imageUrl, boolean isTr) {
         this.id = id;
         this.lectureId = lectureId;
         this.question = question;
@@ -42,7 +42,7 @@ public class Question {
         this.isTr = isTr;
     }
 
-    public int getId() {
+    public String getId() {
         return id;
     }
 

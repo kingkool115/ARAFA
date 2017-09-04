@@ -21,6 +21,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 import db.DBHelper;
@@ -93,6 +94,7 @@ public class FindLecturesActivity extends NavigationBarActivity {
         ListView listViewLayout = (ListView) findViewById(R.id.listview_find_lectures);
 
         // iterate all lecture checkboxes
+        List<Lecture> subscribedLectures = new LinkedList<>();
         for (int i = 0; i < listViewLayout.getChildCount(); i++) {
             LinearLayout lectureEntry = (LinearLayout) listViewLayout.getChildAt(i);
             CheckBox lectureCheckbox = (CheckBox) lectureEntry.getChildAt(0);
@@ -102,30 +104,38 @@ public class FindLecturesActivity extends NavigationBarActivity {
                 String lectureId = lectureCheckbox.getTag().toString();
                 String lectureName = lectureCheckbox.getText().toString();
                 if (!dbHelper.lectureExists(lectureId)) {
-                    dbHelper.subscribeForLecture(lectureId, lectureName);
+                    subscribedLectures.add(new Lecture(lectureName, Integer.parseInt(lectureId)));
                 }
             }
         }
 
 
         // Tag lectures in PushBots
-        List<Lecture> subscribedLectures =  dbHelper.getSubscribedLectures();
-        JSONArray tags = new JSONArray();
+        JSONArray lectureIds = new JSONArray();
         for (Lecture lecture : subscribedLectures) {
-            tags.put("" + lecture.getId());
+            lectureIds.put("" + lecture.getId());
         }
         JSONObject jsonObject = new JSONObject();
         try{
-            jsonObject.put("tags", tags);
+            jsonObject.put("tags", lectureIds);
         } catch (JSONException e) {
             e.printStackTrace();
         }
         // resets all old tags and add new tags
         Pushbots.sharedInstance().update(jsonObject);
 
+        // subscribe for Lectures in Webservice
+        RestTask restTaskSubscribe = new RestTask(this, ACTION_FOR_INTENT_CALLBACK);
+        restTaskSubscribe.subscribeLectures(lectureIds);
+
+        // TODO: only update DB after subsription in Webservice was successful
+        for (Lecture lecture : subscribedLectures) {
+            dbHelper.subscribeForLecture("" + lecture.getId(), lecture.getName());
+        }
+
         // reload lectures in view
-        RestTask restTask = new RestTask(this, ACTION_FOR_INTENT_CALLBACK);
-        restTask.loadLectures();
+        RestTask restTaskLoadLectures = new RestTask(this, ACTION_FOR_INTENT_CALLBACK);
+        restTaskLoadLectures.loadLectures();
     }
 
     /**

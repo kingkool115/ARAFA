@@ -6,13 +6,13 @@ package util;
 public class Answer {
 
     private int id;
-    private int questionId;
+    private String questionId;
     private String answer;
 
     /**
      * Constructor.
      * */
-    public Answer(int id, int questionId, String answer) {
+    public Answer(int id, String questionId, String answer) {
         this.id = id;
         this.questionId = questionId;
         this.answer = answer;
@@ -22,7 +22,7 @@ public class Answer {
         return answer;
     }
 
-    public int getQuestionId() {
+    public String getQuestionId() {
         return questionId;
     }
 
