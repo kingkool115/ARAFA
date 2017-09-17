@@ -128,10 +128,7 @@ public class AnswerQuestionActivity extends AppCompatActivity {
                     answer = textResponseTextField.getText().toString();
                 }
 
-                restTask.submitAnswer(question, answer, isTextResponse);
-
-                // TODO: check if submitting was successful than remove from DB
-                dbHelper.questionAnswered(question.getId());
+                restTask.submitAnswer(question, answer);
 
                 Intent openQuestionsActivity = new Intent(AnswerQuestionActivity.this, OpenQuestionsActivity.class);
                 AnswerQuestionActivity.this.startActivity(openQuestionsActivity);

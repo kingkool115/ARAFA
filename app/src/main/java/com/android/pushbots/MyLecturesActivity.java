@@ -96,7 +96,6 @@ public class MyLecturesActivity extends NavigationBarActivity {
         alertDialogBuilder.setMessage(selectedLectures);
 
         final List<String> lectureIdsToUnsubscribe = selectedLectureIds;
-        final DBHelper dbHelper = new DBHelper(this);
         // set dialog selectedLectures
         alertDialogBuilder
                 .setCancelable(false)
@@ -107,21 +106,7 @@ public class MyLecturesActivity extends NavigationBarActivity {
                         for (String lectureId : lectureIdsToUnsubscribe) {
                             jsonArrayLectureIds.put(lectureId);
                         }
-                        // TODO: unsubscribe in DB only when unsubscription in Webservice was susccessful.
-                        restTask.unsubscribeLectures(jsonArrayLectureIds);
-
-                        dbHelper.unsubscribeFromLecture(lectureIdsToUnsubscribe);
-                        // Untag in Pushbots instance to avoid pushed questions related to this lecture.
-                        for (String lectureId : lectureIdsToUnsubscribe) {
-                            Pushbots.sharedInstance().untag(lectureId);
-                        }
-                        // empty and refill list with subscribed lectures entries.
-                        checkboxList = new ArrayList<>();
-                        myLecturesListView.setAdapter(
-                                                    new CustomListAdapter(MyLecturesActivity.this,
-                                                            R.layout.listitemrow, checkboxList));
-                        fillLecturesList();
-                        Toast.makeText(MyLecturesActivity.this, "Subscribed", Toast.LENGTH_SHORT);
+                        restTask.unsubscribeLectures(jsonArrayLectureIds, lectureIdsToUnsubscribe);
                     }
                 })
                 .setNegativeButton("No",new DialogInterface.OnClickListener() {

@@ -40,7 +40,7 @@ public class FindLecturesActivity extends NavigationBarActivity {
 
     ArrayList<Lecture> checkboxList;
 
-    private static final String ACTION_FOR_INTENT_CALLBACK = "THIS_IS_A_UNIQUE_KEY_WE_USE_TO_COMMUNICATE";
+    public static final String ACTION_FOR_INTENT_CALLBACK = "THIS_IS_A_UNIQUE_KEY_WE_USE_TO_COMMUNICATE";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,20 +51,85 @@ public class FindLecturesActivity extends NavigationBarActivity {
         checkboxList = new ArrayList<>();
         RestTask restTask = new RestTask(this, ACTION_FOR_INTENT_CALLBACK);
         restTask.loadLectures();
-        initFilterFunction();
     }
 
+    /**
+     * Init subscribe button and add onClickListener to it. When this button is clicked,
+     * the selected lectures will be saved to DB.
+     **/
+    public void clickSubscribe(View view) {
+        final DBHelper dbHelper = new DBHelper(this);
+
+        //Do stuff here
+        ListView listViewLayout = (ListView) findViewById(R.id.listview_find_lectures);
+
+        // iterate all lecture checkboxes
+        List<Lecture> lecturesToSubscribe = new LinkedList<>();
+        for (int i = 0; i < listViewLayout.getChildCount(); i++) {
+            LinearLayout lectureEntry = (LinearLayout) listViewLayout.getChildAt(i);
+            CheckBox lectureCheckbox = (CheckBox) lectureEntry.getChildAt(0);
+
+            // if lecture is selected then insert into DB.
+            if (lectureCheckbox.isChecked()) {
+                String lectureId = lectureCheckbox.getTag().toString();
+                String lectureName = lectureCheckbox.getText().toString();
+                if (!dbHelper.lectureExists(lectureId)) {
+                    lecturesToSubscribe.add(new Lecture(lectureName, Integer.parseInt(lectureId)));
+                }
+            }
+        }
+
+        // Tag lectures in PushBots
+        JSONArray lectureIds = new JSONArray();
+        for (Lecture lecture : lecturesToSubscribe) {
+            lectureIds.put("" + lecture.getId());
+        }
+        for (Lecture lecture : dbHelper.getSubscribedLectures()) {
+            lectureIds.put("" + lecture.getId());
+        }
+        JSONObject jsonObject = new JSONObject();
+        try{
+            jsonObject.put("tags", lectureIds);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        // resets all old tags and add new tags
+        Pushbots.sharedInstance().update(jsonObject);
+
+        // subscribe for Lectures in Webservice
+        RestTask restTaskSubscribe = new RestTask(this, ACTION_FOR_INTENT_CALLBACK);
+        restTaskSubscribe.subscribeLectures(lectureIds, lecturesToSubscribe);
+    }
 
     /**
-     * This function implements the filter function, when user want to filter lectures.
+     * HTTP Response is parsed to an JSONArray of lectures. Every lecture will be added as an
+     * CheckBox to the list view.
+     *
+     * @param response HTTP response content from server.
      * */
-    private void initFilterFunction() {
-        ListView findLecturesListView = (ListView) findViewById(R.id.listview_find_lectures);
+    private void fillLecturesList(String response) throws JSONException {
+        JSONArray lecturesArray = new JSONArray(response);
+        ListView listViewLectures = (ListView) findViewById(R.id.listview_find_lectures);
+
+        // needed for refill lecture list after clicking subscribe button
+        checkboxList = new ArrayList<>();
+
+        // iterate all lectures
+        for (int x = 0; x < lecturesArray.length(); x++) {
+            JSONObject lecture = (JSONObject) lecturesArray.get(x);
+
+            // if not subscribed for that lecture, then add it to the list.
+            DBHelper dbHelper = new DBHelper(this);
+            if (!dbHelper.lectureExists(lecture.get("id").toString())) {
+                String lectureName = lecture.get("name").toString();
+                int lectureId = lecture.getInt("id");
+                checkboxList.add(new Lecture(lectureName, lectureId));
+            }
+        }
 
         // get data from the table by the ListAdapter
         final CustomListAdapter customAdapter = new CustomListAdapter(this, R.layout.listitemrow, checkboxList);
-
-        findLecturesListView.setAdapter(customAdapter);
+        listViewLectures.setAdapter(customAdapter);
 
         EditText filterText = (EditText) findViewById(R.id.filterLectures);
         filterText.addTextChangedListener(new TextWatcher() {
@@ -81,90 +146,6 @@ public class FindLecturesActivity extends NavigationBarActivity {
             @Override
             public void afterTextChanged(Editable arg0) {}
         });
-    }
-
-    /**
-     * Init subscribe button and add onClickListener to it. When this button is clicked,
-     * the selected lectures will be saved to DB.
-     **/
-    public void clickSubscribe(View view) {
-        final DBHelper dbHelper = new DBHelper(this);
-
-        //Do stuff here
-        ListView listViewLayout = (ListView) findViewById(R.id.listview_find_lectures);
-
-        // iterate all lecture checkboxes
-        List<Lecture> subscribedLectures = new LinkedList<>();
-        for (int i = 0; i < listViewLayout.getChildCount(); i++) {
-            LinearLayout lectureEntry = (LinearLayout) listViewLayout.getChildAt(i);
-            CheckBox lectureCheckbox = (CheckBox) lectureEntry.getChildAt(0);
-
-            // if lecture is selected then insert into DB.
-            if (lectureCheckbox.isChecked()) {
-                String lectureId = lectureCheckbox.getTag().toString();
-                String lectureName = lectureCheckbox.getText().toString();
-                if (!dbHelper.lectureExists(lectureId)) {
-                    subscribedLectures.add(new Lecture(lectureName, Integer.parseInt(lectureId)));
-                }
-            }
-        }
-
-
-        // Tag lectures in PushBots
-        JSONArray lectureIds = new JSONArray();
-        for (Lecture lecture : subscribedLectures) {
-            lectureIds.put("" + lecture.getId());
-        }
-        JSONObject jsonObject = new JSONObject();
-        try{
-            jsonObject.put("tags", lectureIds);
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-        // resets all old tags and add new tags
-        Pushbots.sharedInstance().update(jsonObject);
-
-        // subscribe for Lectures in Webservice
-        RestTask restTaskSubscribe = new RestTask(this, ACTION_FOR_INTENT_CALLBACK);
-        restTaskSubscribe.subscribeLectures(lectureIds);
-
-        // TODO: only update DB after subsription in Webservice was successful
-        for (Lecture lecture : subscribedLectures) {
-            dbHelper.subscribeForLecture("" + lecture.getId(), lecture.getName());
-        }
-
-        // reload lectures in view
-        RestTask restTaskLoadLectures = new RestTask(this, ACTION_FOR_INTENT_CALLBACK);
-        restTaskLoadLectures.loadLectures();
-    }
-
-    /**
-     * HTTP Response is parsed to an JSONArray of lectures. Every lecture will be added as an
-     * CheckBox to the list view.
-     *
-     * @param response HTTP response content from server.
-     * */
-    private void fillLecturesList(String response) throws JSONException {
-        JSONArray lecturesArray = new JSONArray(response);
-        ListView listViewLectures = (ListView) findViewById(R.id.listview_find_lectures);
-
-        // needed for refill lecture list after clicking subscribe button
-        checkboxList = new ArrayList<>();
-        listViewLectures.setAdapter(new CustomListAdapter(this, R.layout.listitemrow, checkboxList));
-
-
-        // iterate all lectures
-        for (int x = 0; x < lecturesArray.length(); x++) {
-            JSONObject lecture = (JSONObject) lecturesArray.get(x);
-
-            // if not subscribed for that lecture, then add it to the list.
-            DBHelper dbHelper = new DBHelper(this);
-            if (!dbHelper.lectureExists(lecture.get("id").toString())) {
-                String lectureName = lecture.get("name").toString();
-                int lectureId = lecture.getInt("id");
-                checkboxList.add(new Lecture(lectureName, lectureId));
-            }
-        }
     }
 
     @Override

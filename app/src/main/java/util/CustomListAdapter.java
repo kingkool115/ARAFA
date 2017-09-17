@@ -43,8 +43,6 @@ public class CustomListAdapter extends ArrayAdapter<Lecture> implements Filterab
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-
-
         View v = convertView;
 
         if (v == null) {
